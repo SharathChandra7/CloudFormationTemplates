@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: 2010-09-09
+#Here we creating mapping. For Mappings use intrinsic function !FindInMap
+Parameters:
+  MyKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Select the key Pair
+Mappings:
+  MyRegionMap:
+    us-east-2:
+      HVM64: ami-0d542ef84ec55d71c 
+    us-west-1:
+      HVM64: ami-04bc3da8f14823e88
+Resources:
+  MyVMInstanceInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !FindInMap
+        -  MyRegionMap #Here it will bring the region
+        -  !Ref 'AWS::Region' #PseduoParameters,Top level key, here it will bring the region we are in 
+        -  HVM64 # Second Level key, Based on region, this parameter will return the AMI ID
+      KeyName: !Ref MyKeyName
+      InstanceType: t2.micro
+    

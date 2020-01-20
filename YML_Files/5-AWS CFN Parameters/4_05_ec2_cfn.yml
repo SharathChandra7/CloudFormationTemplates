@@ -1,0 +1,42 @@
+#In this template, we going to create a parameter where user can select the Availabilty Zone paramater,keyName,InstanceType from the list
+
+AWSTemplateFormatVersion: 2010-09-09
+#Creation of new keyname AZ paramaters and InstanceType
+Parameters:
+  MyKeyName:
+    Description: Select the key Name from the list
+    Type: AWS::EC2::KeyPair::KeyName 
+  MyAvailabilityZone:
+    Description: Select the AZ
+    Type: String
+    Default: us-east-2a
+    AllowedValues:
+      -  us-east-2a
+      -  us-east-2b
+      -  us-east-2c
+  MyInstanceType:
+    Description: Select the ec2 instancetype from list SSM
+    Type: AWS::SSM::Parameter::Value<String>
+Resources:
+  DevEC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-0d542ef84ec55d71c      
+#Refernce the key name,AvailabilityZone,InstanceType parameters 
+      KeyName: !Ref MyKeyName
+      AvailabilityZone: !Ref MyAvailabilityZone
+      InstanceType: !Ref MyInstanceType       
+      SecurityGroups:
+        -  default
+        -  !Ref SSHSecurityGroup   
+      
+#So now we going to create security group,it's new resource
+  SSHSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: my new ssh SG
+      SecurityGroupIngress:
+        -  IpProtocol: tcp
+           FromPort: '22'
+           ToPort: '22'
+           CidrIp: 0.0.0.0/0

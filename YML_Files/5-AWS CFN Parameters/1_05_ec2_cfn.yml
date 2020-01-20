@@ -1,0 +1,29 @@
+#In this template, we going to create a parameter where user can select the key name from the list
+
+AWSTemplateFormatVersion: 2010-09-09
+#Creation of new keyname paramater
+Parameters:
+  MyKeyName:
+    Description: Select the key Name from the list
+    Type: AWS::EC2::KeyPair::KeyName 
+Resources:
+  DevEC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-0d542ef84ec55d71c
+      InstanceType: t2.micro
+#Refering the key name parameter 
+      KeyName: !Ref MyKeyName
+      SecurityGroups:
+        -  default
+        -  !Ref SSHSecurityGroup
+#So now we going to create security group,it's new resource
+  SSHSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: my new ssh SG
+      SecurityGroupIngress:
+        -  IpProtocol: tcp
+           FromPort: '8080'
+           ToPort: '8080'
+           CidrIp: 0.0.0.0/0

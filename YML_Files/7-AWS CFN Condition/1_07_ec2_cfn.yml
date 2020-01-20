@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: 2010-09-09
+#Here we adding condition, when we select Prod as environment, it should assign Elastic IP.
+Parameters:
+  MyKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Select the key Pair
+  EnvironementName:
+    Description: Select the Environment
+    Type: String
+    Default: dev
+    AllowedValues:
+      -  dev
+      -  prod
+Mappings:
+  MyRegionMap:
+    us-east-2:
+      HVM64: ami-0d542ef84ec55d71c 
+    us-west-1:
+      HVM64: ami-04bc3da8f14823e88
+  MyEnvironmentType:
+    dev:
+      instanceType: t2.micro
+    prod:
+      instanceType: t2.small
+Conditions: #Here we comparing user given input with Prod.This condition is not aplicable when we select Dev
+  CreateEIPForProd: !Equals [!Ref EnvironementName, prod]
+Resources:
+  MyVMInstanceInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !FindInMap
+        -  MyRegionMap #Here it will bring the region
+        -  !Ref 'AWS::Region' #PseduoParameters,Top level key, here it will bring the region we are in 
+        -  HVM64 # Second Level key, Based on region, this parameter will return the AMI ID      
+      InstanceType: !FindInMap
+        - MyEnvironmentType
+        - !Ref EnvironementName #Here we need to parameterize because, as we have two values dev and prod and user should be able to select any 1 value
+        - instanceType
+      KeyName: !Ref MyKeyName
+  MyProdEIP:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateEIPForProd #If this is true, then an Elatic IP is assigned to our Instance
+    Properties:
+      InstanceId: !Ref MyVMInstanceInstance
+      
+      
